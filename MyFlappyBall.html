@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>MyFlappyBall</title>
+		<style type="text/css">
+			body{
+				background-color: #1ABDE6;
+				text-align: center;
+				align-content: center;
+			}
+			#game{
+				margin-left: auto ;
+				margin-right: auto;
+				width: 500px;
+				height: 500px;
+				background: url(img/sky.png);
+				overflow: hidden;
+				position: relative;
+				border-radius: 50px;
+			}
+			#game .sky{
+				width : 500px;
+				height : 500px;
+				overflow: hidden;
+            	position: relative;
+			}
+			#game .pipeUp{
+				background: url(img/pipe2.png) bottom center;
+			}
+			#game .pipeDown{
+				background: url(img/pipe1.png) top center;
+			}
+			#bird{
+				width: 34px;
+            	height: 26px;
+            	left: 100px;
+				position: absolute;
+				background:url(img/birds.png) -8px -10px no-repeat;
+			}
+			#score{
+				text-align: center;
+				font-size: 30px;
+				font-style: inherit;
+				color: red;
+				font-family: "copperplate gothic bold";
+				display: table-cell;
+				
+			}
+			button{
+				margin-top: 5px;
+				width: 100px;
+				height: 40px;
+				font-size: 20px;
+				background-color: #0FCE35;
+				border: 0px;
+				border-radius: 10px;
+			}
+			#score{
+				margin-left: 30px;
+				position: absolute;
+				color:#0000CC;
+			}
+		</style>
+		<body>
+		<div id="game">
+			<div id="bird"></div>
+			<div id="score" style=""></div>
+			
+		</div>
+			重新开始：<button onclick="restart()">restart</button>
+			加速：<button onclick="speedUp()">speed up</button>
+			减速：<button onclick="speedDown()">speed up</button></br>
+			<span style="line-height: 30px;">当前速度：</span><span id="showSpeed"></span></br>
+			<button id="practiseFraud" onclick="practiseFraudFunction()">开挂！！</button>
+		</body>
+		<script type="text/javascript">
+			var gameTimer;
+			var birdTimer;
+			var gameover = false;
+			var g = 1.5;
+			var speed = 1;
+			var birdTop = 200;
+			var practiseFraud = false;
+			var game = document.getElementById("game");
+			var bird = document.getElementById("bird");
+			var practiseFraudDom = document.getElementById("practiseFraud");
+			var positionX = 0;
+			var score = 1;
+			var scoreElement = document.getElementById("score");
+			function practiseFraudFunction(){
+				if(!practiseFraud){
+					practiseFraud = true;
+					practiseFraudDom.innerHTML = "取消开挂";					
+				}else{
+					practiseFraud = false;
+					practiseFraudDom.innerHTML = "开挂!!";
+				}
+			}
+			function speedUp(){
+				g += 0.5;
+				speed ++;
+			}
+			function speedDown(){
+				g -= 0.5;
+				speed --;
+			}
+			function flushGame(){
+				positionX -= 1;
+				game.style.backgroundPositionX = positionX + "px";
+				game
+			}
+			function Bird(){
+				this.left = 100;
+				this.top = 200;
+			}
+			
+			var birdClass = new Bird();
+			
+			function flushBird(){
+				birdClass.top += g;
+				bird.style.top = birdClass.top + "px";
+			}
+			
+			function Pipe(position){
+				this.x = position;
+				this.width = 52;
+				this.pipeUpHeight = 150+Math.floor(Math.random()*120);
+				this.pipeDownHeight = 500-this.pipeUpHeight-150;
+				this.upTop = 0;
+				this.downButtom = 0;
+				this.position = "absolute";
+				var pipeUp = document.createElement("div");
+				pipeUp.className = "pipeUp";
+				pipeUp.style.width = this.width+"px";
+				pipeUp.style.height = this.pipeUpHeight+"px";
+				pipeUp.style.top = this.upTop+"px";
+				pipeUp.style.position = this.position;
+				pipeUp.style.left = this.x+"px";
+				
+				var pipeDown = document.createElement("div");
+				pipeDown.className = "pipeDown";
+				pipeDown.style.width = this.width+"px";
+				pipeDown.style.height = this.pipeDownHeight+"px";
+				pipeDown.style.bottom = this.downButtom+"px";
+				pipeDown.style.position = this.position;
+				pipeDown.style.left = this.x+"px";
+				
+				var _this = this;
+				this.flushPipe = function(){
+					_this.x -= g;
+					pipeUp.style.left = _this.x+"px";
+					pipeDown.style.left = _this.x+"px";
+					pipeUp.style.height = _this.pipeUpHeight+"px";
+					pipeDown.style.height = _this.pipeDownHeight+"px";
+					if(_this.x < -52){
+						_this.x = 600;
+						 score ++;
+						_this.pipeUpHeight = 150+Math.floor(Math.random()*120);
+						_this.pipeDownHeight = 500-_this.pipeUpHeight-150;
+					}
+					if(_this.x < birdClass.left+34 && _this.x+52  > birdClass.left+20
+							&&  _this.pipeUpHeight > birdClass.top){
+								gameover = true;
+								alert("分数： "+ score);
+					}else if(_this.x < birdClass.left+34 && _this.x + 52 > birdClass.left+20
+							&& _this.pipeDownHeight + birdClass.top + 26 > 500){
+								gameover = true;
+								alert("分数： "+ score);
+					}
+					if(!gameover){
+						game.appendChild(pipeDown);
+						game.appendChild(pipeUp);
+					}
+					if(practiseFraud){
+						if(_this.x < birdClass.left+150 && _this.x + 52 > birdClass.left + 32
+								&& 500 - _this.pipeDownHeight > birdClass.top
+								&& 500 - _this.pipeDownHeight < birdClass.top +80){
+							birdClass.top -= 3;
+						}else if(_this.x < birdClass.left+150 && _this.x + 52 > birdClass.left + 32
+								&& 500 - _this.pipeDownHeight < birdClass.top+30){
+							birdClass.top -= 7;
+						}
+					}
+				}
+			this.removePipe = function(){
+				game.removeChild(pipeUp);
+				game.removeChild(pipeDown);
+			}
+			}
+			var pipe1;
+			var pipe2;
+			var pipe3;
+			var pipe4;
+			var pipeFlush1;
+			var pipeFlush2;
+			var pipeFlush3;
+			var pipeFlush4;
+			var gameoverTimer;
+			function initPipe(){
+				pipe1 = new Pipe(200);
+				pipe2 = new Pipe(350);
+				pipe3 = new Pipe(500);
+				pipe4 = new Pipe(650);
+				
+				pipeFlush1 = setInterval("pipe1.flushPipe()",20);
+				pipeFlush2 = setInterval("pipe2.flushPipe()",20);
+				pipeFlush3 = setInterval("pipe3.flushPipe()",20);
+				pipeFlush4 = setInterval("pipe4.flushPipe()",20);
+			}
+			window.onload = function(){
+				//刷新背景
+				gameTimer = setInterval("flushGame()",10);
+				//刷新鸟
+				birdTimer = setInterval("flushBird()",20);
+				setInterval(function(){
+					scoreElement.innerHTML = score; 
+					document.getElementById("showSpeed").innerHTML = "X"+speed;
+//					if(gameover){
+//						clearTimeout(gameoverTimer);
+//					}
+				})
+				gameoverTimer = setInterval(function(){
+					if(gameover){
+						score = 1;
+						clearTimeout(gameTimer);
+						clearTimeout(birdTimer);
+						clearTimeout(gameoverTimer);
+						clearTimeout(pipeFlush1);
+						clearTimeout(pipeFlush2);
+						clearTimeout(pipeFlush3);
+						clearTimeout(pipeFlush4);
+   						//alert("分数: "+score);
+					}	
+				})
+				initPipe();
+			}
+			window.onmousedown = function(){
+				birdClass.top -=65;
+			}
+			function restart(){
+				pipe1.removePipe();
+				pipe2.removePipe();
+				pipe3.removePipe();
+				pipe4.removePipe();
+				
+				birdClass.top = 200;
+				gameover = false;
+				//刷新背景
+				gameTimer = setInterval("flushGame()",10);
+				//刷新鸟
+				birdTimer = setInterval("flushBird()",20);
+				initPipe();
+				gameoverTimer = setInterval(function(){
+					if(gameover){
+						clearTimeout(gameTimer);
+						clearTimeout(birdTimer);
+						clearTimeout(gameoverTimer);
+						clearTimeout(pipeFlush1);
+						clearTimeout(pipeFlush2);
+						clearTimeout(pipeFlush3);
+						clearTimeout(pipeFlush4);
+						//alert("分数: "+score);
+					}	
+				})
+			}
+		</script>
+	</head>
+</html>
